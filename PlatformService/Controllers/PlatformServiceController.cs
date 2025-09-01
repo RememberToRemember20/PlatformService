@@ -19,7 +19,7 @@ namespace PlatformService.Controllers
             _mapper=mapper; 
             _repository=repository;
         }
-        [HttpGet("GetAllPlatform")]
+        [HttpGet]
         public ActionResult<IEnumerable<PlatformReadDTO>>GetAllPlatforms()
         {
             var platforms = _repository.GetAllPlatform();

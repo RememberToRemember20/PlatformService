@@ -1,14 +1,29 @@
-# See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
-
-# This stage is used when running from VS in fast mode (Default for Debug configuration)
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build-env
 WORKDIR /app
+
+# Copy the project file and restore dependencies first.
+# This is a key optimization. As long as your .csproj file doesn't change,
+# Docker will use the cached layer for dependencies, making builds faster.
 COPY *.csproj ./
 RUN dotnet restore
+
+# Copy the rest of your application's source code
 COPY . ./
+
+# Publish the application, creating a release build in the 'out' folder
 RUN dotnet publish -c Release -o out
 
-from mcr.microsoft.com/dotnet/aspnet:8.0 
+
+# Stage 2: Create the final, smaller runtime image
+# The 'FROM' keyword should be uppercase.
+# We use the smaller ASP.NET runtime image because it doesn't need the whole SDK.
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
-COPY --from=build-env/app/out .
-ENTRYPOINT [ "dotnet" , "PlatformService.dll" ]
+
+# CRITICAL FIX: The COPY command needs a source and a destination.
+# We are copying from the 'build-env' stage's /app/out directory (the source)
+# to the current directory '.' (the destination) in this new stage.
+COPY --from=build-env /app/out .
+
+# Set the command to run when the container starts
+ENTRYPOINT ["dotnet", "PlatformService.dll"]
