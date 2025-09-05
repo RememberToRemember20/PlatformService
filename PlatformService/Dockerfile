@@ -25,5 +25,9 @@ WORKDIR /app
 # to the current directory '.' (the destination) in this new stage.
 COPY --from=build-env /app/out .
 
+ENV ASPNETCORE_URLS=http://+:80
+
+EXPOSE 80
+
 # Set the command to run when the container starts
 ENTRYPOINT ["dotnet", "PlatformService.dll"]

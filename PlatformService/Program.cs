@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using PlatformService.DbContexts;
 using PlatformService.Repository;
+using PlatformService.SyncDataService;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<PlatformDbContext>(opt=>opt.UseInMemoryDatabase("InMemory"));
 builder.Services.AddControllers();
 builder.Services.AddScoped<IPlatformRepository, PlatformRepository>();
+builder.Services.AddHttpClient<ICommandDataClient, HttpCommandDataClient>();
 builder.Services.AddAutoMapper(cfg=>cfg.AddMaps(AppDomain.CurrentDomain.GetAssemblies()));
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -24,7 +26,7 @@ if (app.Environment.IsDevelopment()||app.Environment.IsProduction())
     app.UseSwaggerUI();
 }
 PrepDb.Prepopulation(app);
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
